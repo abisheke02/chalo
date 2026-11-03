@@ -1,0 +1,44 @@
+# Render Blueprint: Render > New > Blueprint > pick this repository.
+# The site stores its data in Turso (hosted SQLite). Secrets are left blank here and filled in on Render.
+services:
+  - type: web
+    name: chaloschools
+    runtime: node
+    plan: starter
+    region: singapore
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /robots.txt
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: NOTIFICATION_EMAIL
+        sync: false
+      - key: SITE_NAME
+        value: ChaloSchools
+      # Set these when the real domain and tracking IDs are ready (leave blank until then):
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: NEXT_PUBLIC_GA_ID
+        sync: false
+      - key: NEXT_PUBLIC_GTM_ID
+        sync: false
+      - key: NEXT_PUBLIC_META_PIXEL_ID
+        sync: false
