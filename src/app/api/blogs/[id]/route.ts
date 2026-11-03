@@ -1,0 +1,138 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+import { validateId, parseAndValidateBody, getStringField, getBooleanField, safeErrorResponse } from '@/lib/api-helpers'
+import { requireAdminAuth } from '@/lib/auth'
+import { logAudit } from '@/lib/audit-log'
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+
+    if (!validateId(id)) {
+      return safeErrorResponse('Invalid ID format', 400)
+    }
+
+    const blog = await db.blogPost.findUnique({ where: { id } })
+
+    if (!blog) {
+      return safeErrorResponse('Blog post not found', 404)
+    }
+
+    return NextResponse.json(blog)
+  } catch (error) {
+    console.error('Error fetching blog:', error)
+    return safeErrorResponse('Failed to fetch blog post', 500)
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = requireAdminAuth(request);
+  if (!auth.authenticated) return auth.response;
+  try {
+    const { id } = await params
+
+    if (!validateId(id)) {
+      return safeErrorResponse('Invalid ID format', 400)
+    }
+
+    const parsed = await parseAndValidateBody(request)
+    if (!parsed.success) return parsed.response
+
+    const body = parsed.body
+    const title = getStringField(body, 'title')
+    const excerpt = getStringField(body, 'excerpt')
+    const content = getStringField(body, 'content')
+    const category = getStringField(body, 'category')
+    const author = getStringField(body, 'author')
+    const coverImage = getStringField(body, 'coverImage')
+    const published = getBooleanField(body, 'published')
+
+    const existing = await db.blogPost.findUnique({ where: { id } })
+    if (!existing) {
+      return safeErrorResponse('Blog post not found', 404)
+    }
+
+    let slug = existing.slug
+    if (title && title !== existing.title) {
+      slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      const slugExists = await db.blogPost.findFirst({ where: { slug, NOT: { id } } })
+      if (slugExists) {
+        return safeErrorResponse('A blog post with this slug already exists', 409)
+      }
+    }
+
+    const wasPublished = existing.published
+    const willPublish = published ?? wasPublished
+
+    const blog = await db.blogPost.update({
+      where: { id },
+      data: {
+        ...(title && { title }),
+        ...(slug !== existing.slug && { slug }),
+        ...(excerpt !== null && { excerpt: excerpt || null }),
+        ...(content && { content }),
+        ...(category && { category }),
+        ...(author !== null && { author: author || null }),
+        ...(coverImage !== null && { coverImage: coverImage || null }),
+        published: willPublish,
+        publishedAt: !wasPublished && willPublish ? new Date() : existing.publishedAt,
+      },
+    })
+
+    await logAudit({
+      user: auth.user,
+      action: 'update',
+      section: 'blogs',
+      targetId: id,
+      summary: `${auth.user.email} updated blog post "${blog.title}"`,
+      request,
+    })
+
+    return NextResponse.json(blog)
+  } catch (error) {
+    console.error('Error updating blog:', error)
+    return safeErrorResponse('Failed to update blog post', 500)
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = requireAdminAuth(request);
+  if (!auth.authenticated) return auth.response;
+  try {
+    const { id } = await params
+
+    if (!validateId(id)) {
+      return safeErrorResponse('Invalid ID format', 400)
+    }
+
+    const existing = await db.blogPost.findUnique({ where: { id } })
+    if (!existing) {
+      return safeErrorResponse('Blog post not found', 404)
+    }
+
+    await db.blogPost.delete({ where: { id } })
+
+    await logAudit({
+      user: auth.user,
+      action: 'delete',
+      section: 'blogs',
+      targetId: id,
+      summary: `${auth.user.email} deleted blog post "${existing.title}"`,
+      request,
+    })
+
+    return NextResponse.json({ message: 'Blog post deleted successfully' })
+  } catch (error) {
+    console.error('Error deleting blog:', error)
+    return safeErrorResponse('Failed to delete blog post', 500)
+  }
+}

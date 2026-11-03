@@ -1,0 +1,25 @@
+{
+  "Hero": {
+    "eyebrow": "School ERP for CBSE, IB, Cambridge and State Boards",
+    "titleLead": "Your entire school.",
+    "titleAccent": "One platform.",
+    "subtitle": "Collect fees on time, mark attendance in one tap and keep every parent informed. Built in Chennai for schools across Tamil Nadu and India.",
+    "ctaPrimary": "Book a Demo",
+    "ctaSecondary": "Explore Modules",
+    "sceneHint": "Drag to explore. Select a building to view its module.",
+    "sceneHintTouch": "Tap a building to view its module."
+  },
+  "Nav": {
+    "home": "Home",
+    "product": "Product",
+    "features": "Features",
+    "solutions": "Solutions",
+    "resources": "Resources",
+    "company": "Company",
+    "talkToSales": "Talk to Sales",
+    "bookDemo": "Book a Demo"
+  },
+  "Common": {
+    "language": "Language"
+  }
+}
