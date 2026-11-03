@@ -20,6 +20,7 @@ import { db } from '@/lib/db'
 import { buildMetadata } from '@/lib/metadata'
 import { SITE_URL } from '@/lib/site-url'
 import PageHero from '@/components/PageHero';
+import { plainDescription } from '@/lib/seo-text'
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
   return buildMetadata({
     title: `${blog.title}`,
-    description: blog.excerpt || blog.content.substring(0, 160),
+    description: blog.excerpt || plainDescription(blog.content),
     path: `/blog/${slug}`,
     ...(blog.coverImage ? { image: blog.coverImage } : {}),
   })
@@ -50,7 +51,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: blog.title,
-    description: blog.excerpt || blog.content.substring(0, 160),
+    description: blog.excerpt || plainDescription(blog.content),
     image: blog.coverImage || undefined,
     author: { '@type': 'Organization', name: blog.author || 'ChaloSchools' },
     publisher: {

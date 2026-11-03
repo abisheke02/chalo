@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import LengthHint from '@/components/admin/LengthHint';
 
 function slugify(text: string): string {
   return text
@@ -100,6 +101,7 @@ export default function NewNewsPage() {
                 onChange={(e) => updateField('title', e.target.value)}
                 required
               />
+              <LengthHint value={form.title} min={25} max={50} label="Title (shown in search results)" />
             </div>
 
             <div className="space-y-2">
@@ -150,6 +152,7 @@ export default function NewNewsPage() {
                 onChange={(e) => updateField('excerpt', e.target.value)}
                 rows={2}
               />
+              <LengthHint value={form.excerpt} min={110} max={160} label="Description (shown in search results)" />
             </div>
 
             <div className="space-y-2">

@@ -66,6 +66,7 @@ import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import ChatBot from '@/components/ChatBot';
 
 import { db } from '@/lib/db';
+import { parseVideoList } from '@/lib/video-embed';
 
 export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata('/');
@@ -167,6 +168,8 @@ export default async function Home() {
 
   // Only offer walkthrough videos whose files have actually been uploaded.
 
+  const linkVideos = parseVideoList((await db.siteContent.findUnique({ where: { key: 'demo_video_links' } }).catch(() => null))?.value);
+
   const availableVideos = DEMO_VIDEO_IDS.filter((id) => fs.existsSync(path.join(process.cwd(), 'public', 'videos', `${id}.mp4`)));
 
   const isVisible = (key: string) => visibilityRows.find((r) => r.key === `visibility_${key}`)?.value !== 'false';
@@ -180,7 +183,7 @@ export default async function Home() {
     isVisible('trust_stats') && { id: 'numbers', label: 'Our numbers', content: <TrustStats /> },
     isVisible('social_proof') && { id: 'schools', label: 'Schools using us', content: <SocialProofBar /> },
     isVisible('problems') && { id: 'problems', label: 'Problems we fix', content: <ProblemsSection /> },
-    isVisible('demo_video') && { id: 'demo', label: 'Product demo', content: <DemoVideo available={availableVideos} /> },
+    isVisible('demo_video') && { id: 'demo', label: 'Product demo', content: <DemoVideo available={availableVideos} links={linkVideos} /> },
     isVisible('case_study') && caseStudy && { id: 'case-study', label: 'Case study', content: <CaseStudySnapshot caseStudy={caseStudy} /> },
     isVisible('pricing_teaser') && { id: 'pricing', label: 'Pricing', content: <PricingTeaser /> },
     isVisible('blog_strip') && latestPosts.length > 0 && { id: 'news', label: 'Latest news', content: <BlogStrip posts={latestPosts} /> },

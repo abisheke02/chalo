@@ -223,7 +223,7 @@ export default function EditWebinarPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="videoUrl">Video URL</Label>
+              <Label htmlFor="videoUrl">Video link (YouTube or Vimeo)</Label>
               <Input
                 id="videoUrl"
                 placeholder="https://youtube.com/watch?v=..."

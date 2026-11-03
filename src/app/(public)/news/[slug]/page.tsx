@@ -21,6 +21,7 @@ import { db } from '@/lib/db'
 import { buildMetadata } from '@/lib/metadata'
 import { SITE_URL } from '@/lib/site-url'
 import PageHero from '@/components/PageHero';
+import { plainDescription } from '@/lib/seo-text'
 
 interface NewsPageProps {
   params: Promise<{ slug: string }>
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: NewsPageProps): Promise<Metad
 
   return buildMetadata({
     title: `${item.title}`,
-    description: item.excerpt || item.content?.substring(0, 160) || item.title,
+    description: item.excerpt || plainDescription(item.content) || item.title,
     path: `/news/${slug}`,
     ...(item.coverImage ? { image: item.coverImage } : {}),
   })

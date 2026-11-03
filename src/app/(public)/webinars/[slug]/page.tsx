@@ -20,6 +20,7 @@ import { db } from '@/lib/db'
 import { buildMetadata } from '@/lib/metadata'
 import { SITE_URL } from '@/lib/site-url'
 import PageHero from '@/components/PageHero';
+import { parseVideoLink } from '@/lib/video-embed';
 
 interface WebinarPageProps {
   params: Promise<{ slug: string }>
@@ -157,10 +158,10 @@ export default async function WebinarPage({ params }: WebinarPageProps) {
         )}
 
         {/* Video Embed */}
-        {webinar.videoUrl ? (
+        {parseVideoLink(webinar.videoUrl) ? (
           <div className="mb-10 rounded-xl overflow-hidden shadow-sm aspect-video bg-gray-900">
             <iframe
-              src={webinar.videoUrl}
+              src={parseVideoLink(webinar.videoUrl)?.src}
               title={webinar.title}
               className="w-full h-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

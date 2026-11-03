@@ -626,6 +626,10 @@ const HOME_PAGE_CONTENT: SeedItem[] = [
   t('more_heading', 'Everything else, one click away.', 'Homepage - More', 'Heading', 1),
   t('more_intro', 'Pick a topic and read it right here.', 'Homepage - More', 'Text under the heading', 2, 'textarea'),
 
+  // Product videos: links only (YouTube or Vimeo), one a line as "Title | link". Empty means the section shows nothing
+  // (or the self-hosted files, if any are uploaded).
+  t('demo_video_links', '', 'Homepage - Videos', 'Video links, one a line: Title | link', 0, 'textarea'),
+
   // Built-in intelligence (rotating tabs)
   t('aitabs_eyebrow', 'Built-in intelligence', 'Homepage - AI Features', 'Small heading', 0),
   t('aitabs_heading', 'Smart help, built into the school day.', 'Homepage - AI Features', 'Heading', 1),

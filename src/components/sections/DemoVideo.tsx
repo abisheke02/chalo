@@ -6,11 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { PlayCircle } from 'lucide-react';
 
 import { VIDEOS } from '@/data/demo-videos';
+import type { LinkedVideo } from '@/lib/video-embed';
 
 // `available` lists the video ids whose files exist in /public/videos (checked
 // on the server), so the section never shows a broken player.
-export default function DemoVideo({ available }: { available: string[] }) {
-  const videos = VIDEOS.filter((v) => available.includes(v.id));
+// `links` are videos added by link in Admin > Site Content (YouTube or Vimeo). When there are any, they are shown instead of the files.
+export default function DemoVideo({ available, links = [] }: { available: string[]; links?: LinkedVideo[] }) {
+  const files = VIDEOS.filter((v) => available.includes(v.id));
+  const videos: { id: string; title: string; poster: string | null; src: string; kind: 'iframe' | 'file' }[] = links.length
+    ? links.map((l) => ({ id: l.id, title: l.title, poster: l.thumb, src: l.src, kind: l.kind }))
+    : files.map((f) => ({ id: f.id, title: f.title, poster: f.poster, src: f.src, kind: 'file' as const }));
   const [activeId, setActiveId] = useState(videos[0]?.id);
   if (videos.length === 0) return null;
   const active = videos.find((v) => v.id === activeId) ?? videos[0];
@@ -36,15 +41,27 @@ export default function DemoVideo({ available }: { available: string[] }) {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           className="relative rounded-2xl overflow-hidden border border-border shadow-xl bg-card aspect-video mb-6">
-          <video
-            key={active.id}
-            controls
-            poster={active.poster}
-            preload="metadata"
-            className="absolute inset-0 w-full h-full object-cover"
-          >
-            <source src={active.src} type="video/mp4" />
-          </video>
+          {active.kind === 'iframe' ? (
+            <iframe
+              key={active.id}
+              src={active.src}
+              title={active.title}
+              loading="lazy"
+              className="absolute inset-0 h-full w-full"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <video
+              key={active.id}
+              controls
+              poster={active.poster ?? undefined}
+              preload="metadata"
+              className="absolute inset-0 w-full h-full object-cover"
+            >
+              <source src={active.src} type="video/mp4" />
+            </video>
+          )}
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
@@ -60,8 +77,12 @@ export default function DemoVideo({ available }: { available: string[] }) {
                   isActive ? 'border-primary' : 'border-border hover:border-primary/50'
                 }`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={v.poster} alt={v.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                {v.poster ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={v.poster} alt={v.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                ) : (
+                  <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(135deg,#0f2a4a,#026dde)]" />
+                )}
                 <div className={`absolute inset-0 flex items-center justify-center transition-colors ${isActive ? 'bg-black/20' : 'bg-black/35 group-hover:bg-black/25'}`}>
                   <PlayCircle className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow" />
                 </div>
