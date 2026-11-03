@@ -4,7 +4,7 @@ services:
   - type: web
     name: chaloschools
     runtime: node
-    plan: starter
+    plan: free
     region: singapore
     buildCommand: npm ci && npx prisma generate --schema prisma/schema.postgres.prisma && npm run build
     startCommand: npm start
