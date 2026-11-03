@@ -1,21 +1,25 @@
 # Render Blueprint: Render > New > Blueprint > pick this repository.
-# The site stores its data in Turso (hosted SQLite). Secrets are left blank here and filled in on Render.
+# The site stores its data in Supabase (PostgreSQL). Secrets are left blank here and filled in on Render.
 services:
   - type: web
     name: chaloschools
     runtime: node
     plan: starter
     region: singapore
-    buildCommand: npm ci && npm run build
+    buildCommand: npm ci && npx prisma generate --schema prisma/schema.postgres.prisma && npm run build
     startCommand: npm start
     healthCheckPath: /robots.txt
     autoDeploy: true
     envVars:
       - key: NODE_VERSION
         value: 20.11.0
-      - key: TURSO_DATABASE_URL
+      - key: PRISMA_SCHEMA
+        value: prisma/schema.postgres.prisma
+      # Supabase > Project Settings > Database > Connection string. DATABASE_URL is the pooled one (port 6543, add
+      # ?pgbouncer=true&connection_limit=1 at the end); DIRECT_URL is the direct one (port 5432).
+      - key: DATABASE_URL
         sync: false
-      - key: TURSO_AUTH_TOKEN
+      - key: DIRECT_URL
         sync: false
       - key: ADMIN_EMAIL
         sync: false
